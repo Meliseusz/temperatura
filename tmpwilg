@@ -1,0 +1,60 @@
+
+#include <SPI.h>
+#include <OneWire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <DallasTemperature.h>
+#include "DHT.h"
+// żółty do czujnika temperatury
+#define ONE_WIRE_BUS 6
+#define dhtPin 7
+#define dhtType DHT11
+// czujnik temp i wilgotności powietrza
+DHT dht(dhtPin, dhtType);
+
+OneWire oneWire(ONE_WIRE_BUS);
+// 4 - czwarta nóżka steruje resetm
+Adafruit_SSD1306 oled(4);
+DallasTemperature sensors(&oneWire);
+
+void setup()
+{
+  // sensors.begin();
+  oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  // oled.clearDisplay();
+  dht.begin();
+}
+float humidity;
+float tempC;
+
+void loop()
+{
+  sensors.requestTemperatures();
+  humidity = dht.readHumidity();
+  tempC = dht.readTemperature();
+  // obliczenia dla temperatury
+
+  oled.clearDisplay();
+  oled.setTextSize(1);
+  oled.setTextColor(WHITE);
+  oled.setCursor(4, 4);
+  oled.print("Temp. akwa.: ");
+  oled.print(sensors.getTempCByIndex(0));
+  oled.setCursor(115, 4);
+  oled.print("\367C");
+
+  oled.setCursor(4, 14);
+  oled.print("Wilg. pow.: ");
+  oled.print(humidity, 1);
+  oled.setCursor(102, 14);
+  oled.print("%");
+
+  oled.setCursor(4, 24);
+  oled.print("Temp. pow.: ");
+  oled.print(tempC, 1);
+  oled.setCursor(102, 24);
+  oled.print("\367C");
+
+  oled.display();
+  delay(2000);
+}
